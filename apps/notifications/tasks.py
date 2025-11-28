@@ -1,68 +1,54 @@
 from celery import shared_task
 
-from apps.notifications.choices import NotificationStatusChoices
-from apps.notifications.models import Notification
-from apps.notifications.service import NotificationService
+from apps.notifications.choices import DeliveryStatusChoices, NotificationStatusChoices
+from apps.notifications.models import Notification, NotificationLog
+from apps.notifications.service.email import EmailService
+from apps.notifications.service.sms import SMSService
+from apps.notifications.service.telegram import TelegramService
 
 
-@shared_task(bind=True, max_retries=3, default_retry_delay=60)
-def process_notification(self, notification_id: int):
-    """
-    Задача для отправки уведомления, если способ не доступен, используем другой.
+@shared_task
+def send_notification(notification):
+    """Отправляет уведомление."""
 
-    Args:
-        notification_id: ID уведомления
-    """
-    try:
-        notification = Notification.objects.get(id=notification_id)
-    except Notification.DoesNotExist:
-        return
-
-    if notification.status == NotificationStatusChoices.SENT:
-        return
-
-    channels = notification.channels or []
-
-    if not channels:
-        notification.mark_as_failed()
-        return
-
-    for channel in channels:
-        success, error_message, response_data = NotificationService.send_via_channel(
-            notification=notification,
-            channel=channel,
-        )
-
-        NotificationService.log_delivery_attempt(
-            notification=notification,
-            channel=channel,
-            success=success,
-            error_message=error_message,
-            response_data=response_data,
-        )
-
+    user = notification.user
+    for channel in notification.channels or []:
+        success, error, response = _send_via_channel(notification, channel, user)
         if success:
+            NotificationLog.objects.create(
+                notification=notification,
+                channel=channel,
+                status=DeliveryStatusChoices.SUCCESS,
+                error_message=error,
+                response_data=response,
+            )
             notification.mark_as_sent()
             return
-        continue
-
+        NotificationLog.objects.create(
+            notification=notification,
+            channel=channel,
+            status=DeliveryStatusChoices.FAILED,
+            error_message=error,
+            response_data=response,
+        )
     notification.mark_as_failed()
 
 
-@shared_task(bind=True, max_retries=5, default_retry_delay=300)
-def retry_failed_notification(self, notification_id: int):
-    """
-    Задача для повторной попытки отправки неудачных уведомлений
+def _send_via_channel(notification, channel, user):
+    """Отправляет через указанный канал."""
+    if channel == 'email':
+        return EmailService.send(
+            user_email=user.email,
+            subject=notification.subject or 'Уведомление',
+            message=notification.message,
+        )
 
-    Args:
-        notification_id: ID уведомления
-    """
-    try:
-        notification = Notification.objects.get(id=notification_id)
-    except Notification.DoesNotExist:
-        return
+    if channel == 'sms':
+        phone = getattr(user, 'phone_number', None)
+        return SMSService.send(phone_number=phone, message=notification.message)
 
-    notification.status = NotificationStatusChoices.PENDING
-    notification.save(update_fields=['status', 'updated_at'])
+    if channel == 'telegram':
+        chat_id = getattr(user, 'telegram_chat_id', None)
+        return TelegramService.send(chat_id=str(chat_id), message=notification.message)
 
-    process_notification.delay(notification_id)
+    return False, f'Неизвестный канал: {channel}', None

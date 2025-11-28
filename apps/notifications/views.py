@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 
 from apps.notifications.models import Notification, NotificationLog
-from apps.notifications.serializers import NotificationSerializer, NotificationLogSerializer
+from apps.notifications.serializers import NotificationLogSerializer, NotificationSerializer
 
 
 class NotificationViewSet(viewsets.ModelViewSet):

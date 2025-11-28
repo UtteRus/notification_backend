@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
+from django.utils import timezone
 
 from apps.notifications.choices import DeliveryStatusChoices, NotificationStatusChoices, NotificationTypeChoices
 
@@ -63,7 +64,6 @@ class Notification(models.Model):
 
     def mark_as_sent(self):
         """Отмечает уведомление как отправленное"""
-        from django.utils import timezone
 
         self.status = NotificationStatusChoices.SENT
         self.sent_at = timezone.now()
