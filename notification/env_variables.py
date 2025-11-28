@@ -25,7 +25,6 @@ class EnvVariables(BaseSettings):
     REFRESH_TOKEN_LIFETIME: int = 60
     MAX_INACTIVE_DAY: int = 30
 
-
     # SMTP server
     EMAIL_HOST: str
     EMAIL_PORT: int
@@ -34,6 +33,15 @@ class EnvVariables(BaseSettings):
     EMAIL_USE_TLS: bool
     DEFAULT_FROM_EMAIL: str
 
+    # SMS (MTS Omnichannel)
+    SMS_LOGIN: str = ''
+    SMS_PASSWORD: str = ''
+    SMS_NAMING: str = ''
+    API_SEND_URL: str
+    API_CHECK_URL: str
+
+    # Telegram
+    TELEGRAM_BOT_TOKEN: str = ''
 
     model_config = SettingsConfigDict(
         env_file='.environment',

@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'sekizai',
     'rest_framework',
+    'apps.notifications.apps.NotificationConfig',
+    'apps.users.apps.UsersConfig',
 ]
 
 MIDDLEWARE = [
@@ -62,6 +64,7 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
+AUTH_USER_MODEL = 'users.User'
 
 ROOT_URLCONF = 'notification.urls'
 
@@ -170,3 +173,23 @@ SPECTACULAR_SETTINGS = {
         'filter': True,
     },
 }
+
+
+# Email
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = env_variables.EMAIL_HOST
+EMAIL_PORT = env_variables.EMAIL_PORT
+EMAIL_HOST_USER = env_variables.EMAIL_HOST_USER
+EMAIL_HOST_PASSWORD = env_variables.EMAIL_HOST_PASSWORD
+EMAIL_USE_TLS = env_variables.EMAIL_USE_TLS
+DEFAULT_FROM_EMAIL = env_variables.DEFAULT_FROM_EMAIL
+
+# SMS
+SMS_LOGIN = env_variables.SMS_LOGIN
+SMS_PASSWORD = env_variables.SMS_PASSWORD
+SMS_NAMING = env_variables.SMS_NAMING
+API_SEND_URL = env_variables.API_SEND_URL
+API_CHECK_URL = env_variables.API_CHECK_URL
+
+# Telegram
+TELEGRAM_BOT_TOKEN = env_variables.TELEGRAM_BOT_TOKEN
