@@ -3,6 +3,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class EnvVariables(BaseSettings):
     # SECRET_KEY: str
+    SECRET_KEY: str = ''
     DEBUG: bool = False
     BACKEND_HOST: str = 'localhost'
     ALLOWED_HOSTS: list[str] = ['localhost']

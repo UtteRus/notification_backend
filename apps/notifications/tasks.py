@@ -1,6 +1,6 @@
 from celery import shared_task
 
-from apps.notifications.choices import DeliveryStatusChoices, NotificationStatusChoices
+from apps.notifications.choices import DeliveryStatusChoices, NotificationStatusChoices, NotificationTypeChoices
 from apps.notifications.models import Notification, NotificationLog
 from apps.notifications.service.email import EmailService
 from apps.notifications.service.sms import SMSService
@@ -36,18 +36,18 @@ def send_notification(notification):
 
 def _send_via_channel(notification, channel, user):
     """Отправляет через указанный канал."""
-    if channel == 'email':
+    if channel == NotificationTypeChoices.EMAIL:
         return EmailService.send(
             user_email=user.email,
             subject=notification.subject or 'Уведомление',
             message=notification.message,
         )
 
-    if channel == 'sms':
+    if channel == NotificationTypeChoices.SMS:
         phone = getattr(user, 'phone_number', None)
         return SMSService.send(phone_number=phone, message=notification.message)
 
-    if channel == 'telegram':
+    if channel == NotificationTypeChoices.TELEGRAM:
         chat_id = getattr(user, 'telegram_chat_id', None)
         return TelegramService.send(chat_id=str(chat_id), message=notification.message)
 
