@@ -1,0 +1,70 @@
+services:
+  django:
+    image: notification-backend
+    container_name: notification-backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        buildno: 1
+    tty: true
+    entrypoint: ["sh", "/code/docker-entrypoint.sh"]
+    command: python manage.py runserver 0.0.0.0:8000
+    env_file:
+      - .environment
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/code
+    depends_on:
+      - postgres
+      - redis
+
+  redis:
+    image: redis:7.0.7-alpine
+    container_name: notification-redis
+    volumes:
+      - ./storage/redis:/data
+
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: notification-postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - ./storage/postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=notification
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+
+  celery:
+    image: notification-backend
+    container_name: notification-backend-celery
+    command: celery -A notification worker -l INFO
+    restart: always
+    env_file:
+      - .environment
+    volumes:
+      - .:/code
+    depends_on:
+      - redis
+      - postgres
+
+  celery_beat:
+    image: notification-backend
+    container_name: notification-backend-celery_beat
+    command: celery -A notification beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    restart: always
+    env_file:
+      - .environment
+    volumes:
+      - .:/code
+    depends_on:
+      - redis
+      - postgres
+
+
+networks:
+  default:
+    name: core

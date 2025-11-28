@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "notification-backend"
+version = "0.1.0"
+description = "Сервис для отправки уведомлений"
+requires-python = ">=3.10,<4.0"
+dependencies = [
+    "django==5.2.3",
+    "djangorestframework==3.16.0",
+    "djangorestframework-simplejwt==5.5.0",
+    "django-redis",
+    "django_minio_backend==3.8.0",
+    "django-sekizai==4.1.0",
+    "celery == 5.2.3",
+    "redis == 4.4.0",
+    "requests == 2.32.3",
+    "pytest-django == 4.9.0",
+    "factory-boy == 3.3.1",
+    "ruff == 0.14.6",
+    "pydantic-settings",
+    "pydantic",
+    "psycopg2-binary == 2.9.11",
+    "django-celery-beat == 2.8.1",
+    "drf-spectacular == 0.29.0"
+]
+
+
+[tool.ruff]
+line-length = 120
+show-fixes = true
+
+extend-exclude = [
+    'settings.py',
+    '__pycache__',
+    '*.yml.enc',
+    '*/migrations/*',
+]
+
+[tool.ruff.lint]
+ignore = ['F401', 'B904']
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "B",    # flake8-bugbear
+    "I",    # isort
+    "ICN",  # flake8-import-conventions
+    "PGH",  # pygrep-hooks
+    "PIE",  # flake8-pie
+    "PT",   # flake8-pytest-style
+    "RET",  # flake8-return
+    "T20",  # flake8-print
+    "UP",   # pyupgrade
+    "YTT",  # flake8-2020
+]
+
+[tool.ruff.format]
+quote-style = "single"
