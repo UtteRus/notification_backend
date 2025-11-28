@@ -5,8 +5,10 @@ import requests
 from django.conf import settings
 from requests.auth import HTTPBasicAuth
 
+from apps.notifications.service.base_service import BaseServiceMixin
 
-class SMSService:
+
+class SMSService(BaseServiceMixin):
     """Сервис для отправки SMS через MTS Omnichannel API"""
 
     # URL API MTS

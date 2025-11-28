@@ -1,10 +1,10 @@
-from typing import Optional
-
 import requests
 from django.conf import settings
 
+from apps.notifications.service.base_service import BaseServiceMixin
 
-class TelegramService:
+
+class TelegramService(BaseServiceMixin):
     """Сервис для отправки сообщений через Telegram Bot API"""
 
     # URL Telegram Bot API

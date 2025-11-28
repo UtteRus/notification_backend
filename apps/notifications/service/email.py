@@ -1,10 +1,10 @@
-from typing import Optional
-
 from django.conf import settings
 from django.core.mail import send_mail
 
+from apps.notifications.service.base_service import BaseServiceMixin
 
-class EmailService:
+
+class EmailService(BaseServiceMixin):
     """Сервис для отправки уведомлений по email"""
 
     @staticmethod
